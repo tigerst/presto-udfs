@@ -5,6 +5,10 @@ public class ChinaIdArea {
     private String city;
     private String area;
 
+    public ChinaIdArea(){
+
+    }
+
     public ChinaIdArea(String province, String city, String area) {
         this.province = province;
         this.city = city;

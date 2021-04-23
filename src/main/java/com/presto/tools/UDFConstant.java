@@ -14,7 +14,5 @@ public class UDFConstant {
 
     public static final int POLYGON_FROMAT_GEOJSON=2;
 
-    public static final String PREFIX_DEFAULT = "hdfs://tigercluster/";
-
 }
 

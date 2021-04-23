@@ -10,16 +10,18 @@ public class PrestoQueryMonitor {
     private static final String MYSQL_STT_USER_PASS = "BIcap!@#";
 
     private static Statement getPrestoStmt(String host){
+
         Connection conn = null;
-        Statement stmtpresto=null;
-        String url="jdbc:presto://"+host;
+        Statement stmtpresto = null;
+
+        String url= String.format("jdbc:presto://%s", host);
 
         try {
             Class.forName(PRESTO_DRIVER_NAME);
-            Connection connection=  DriverManager.getConnection(url, "master", null);
+            Connection connection = DriverManager.getConnection(url, "hadoop", null);
             connection.setCatalog("mysql3");
             connection.setSchema("capacity");
-            stmtpresto =connection.createStatement();
+            stmtpresto = connection.createStatement();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,22 +40,31 @@ public class PrestoQueryMonitor {
         return conn;
     }
 
+    /**
+     * 同步query详情
+     * @param host  机器地址
+     */
     public static void getQueryDetail(String host){
-        Statement  stmtpresto= getPrestoStmt(host);
+
+        Statement  prestoStmt= getPrestoStmt(host);
 
         try {
-            Connection mysqlcon=getMysqlConn();
-            PreparedStatement mysqlStmt =mysqlcon.prepareStatement( "INSERT INTO  capacity.presto_query_detail (query_id," +
+
+            Connection mysqlConn = getMysqlConn();
+
+            PreparedStatement mysqlStmt = mysqlConn.prepareStatement( "INSERT INTO capacity.presto_query_detail (query_id," +
                     "node_id,state,user,source,started,end_time,elapsedTime,query_sql,queued_time_ms,analysis_time_ms," +
                     "distributed_planning_time_ms) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 
-            int i=0;
-            ResultSet rs=stmtpresto.executeQuery("select query_id,node_id,state,user,source,started,last_heartbeat , " +
+            int i = 0;
+
+            ResultSet rs = prestoStmt.executeQuery("select query_id,node_id,state,user,source,started,last_heartbeat , " +
                     "(to_unixtime(last_heartbeat)-to_unixtime(created)) as elapsedTime ,query ,queued_time_ms,analysis_time_ms," +
                     "distributed_planning_time_ms FROM system.runtime.queries where state in('FINISHED','FAILED') and " +
                     "query not like '%query_id,node_id%' and query not like '%query_id,node_id%'  and " +
                     "date_format(last_heartbeat,'%Y-%m-%d')= get_date(0,'%Y-%m-%d') and query_id not in (select query_id " +
                     " FROM mysql3.capacity.presto_query_detail where date_format(end_time,'%Y-%m-%d')= get_date(0,'%Y-%m-%d') )");
+
             while (rs.next()){
                 mysqlStmt.setString(1,rs.getString(1));
                 mysqlStmt.setString(2,rs.getString(2));
@@ -73,8 +84,8 @@ public class PrestoQueryMonitor {
             }
             System.out.println("getQueryDetail record count: "+i);
             mysqlStmt.close();
-            mysqlcon.close();
-            stmtpresto.close();
+            mysqlConn.close();
+            prestoStmt.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,15 +95,17 @@ public class PrestoQueryMonitor {
     }
 
     public static void getTasksDetail(String host){
+
         Statement   stmtpresto2= getPrestoStmt(host);
         try {
-            Connection mysqlcon2=getMysqlConn();
+            Connection mysqlcon2 = getMysqlConn();
+
             PreparedStatement mysqlStmt2 =mysqlcon2.prepareStatement( "INSERT INTO  capacity.presto_tasks_detail (query_id," +
                     "node_id,stage_id,state,splits,split_blocked_time_ms,processed_input_bytes,processed_input_rows," +
                     "created,start,end_time,used_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 
 
-            ResultSet  rs2=stmtpresto2.executeQuery("select query_id,node_id ,stage_id,state,splits,split_blocked_time_ms," +
+            ResultSet  rs2 = stmtpresto2.executeQuery("select query_id,node_id ,stage_id,state,splits,split_blocked_time_ms," +
                     "processed_input_bytes,processed_input_rows,created,start,last_heartbeat,(unixtime(last_heartbeat)-unixtime(created)) " +
                     "as used_time from system.runtime.tasks where  query_id in (SELECT  query_id FROM system.runtime.queries where state " +
                     "in('FINISHED','FAILED') and query not like '%query_id,node_id%' and  date_format(last_heartbeat,'%Y-%m-%d')=" +

@@ -6,6 +6,7 @@ import com.facebook.presto.spi.function.SqlNullable;
 import com.facebook.presto.spi.function.SqlType;
 import com.facebook.presto.common.type.StandardTypes;
 import com.presto.tools.UDFConstant;
+import com.presto.udfs.utils.ConfigUtils;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
 
@@ -24,7 +25,7 @@ public class GetDepthPath {
     @SqlType(StandardTypes.VARCHAR)
     public static Slice getDepthPath(@SqlType(StandardTypes.VARCHAR) Slice pathSlice,
                                  @SqlType(StandardTypes.INTEGER) long depth){
-        return getDepthPath(Slices.utf8Slice(UDFConstant.PREFIX_DEFAULT), pathSlice, depth);
+        return getDepthPath(Slices.utf8Slice(ConfigUtils.getInstance().getHdfsPrePath()), pathSlice, depth);
     }
 
     @Description("Returns the path in depth split by prefix")

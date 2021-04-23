@@ -12,14 +12,14 @@ import com.presto.udfs.model.ChinaIdArea;
 import com.presto.udfs.utils.ConfigUtils;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
-
+import org.apache.commons.lang.StringUtils;
 import java.util.Map;
 
 /**
  * 中国身份证相关函数
  */
 public class ChinaIdCardFunctions {
-    private static final Map<String, ChinaIdArea> chinaIdAreaMap = ConfigUtils.getIdCardMap();
+
     /**
      * 十七位数字本体码权重
      */
@@ -44,10 +44,16 @@ public class ChinaIdCardFunctions {
         }
 
         String cardPrefix = cardString.substring(0, 6);
-        if (chinaIdAreaMap.containsKey(cardPrefix)) {
-            return chinaIdAreaMap.get(cardPrefix);
-        }
+        String area = ConfigUtils.getInstance().getArea(cardPrefix);
+        if (StringUtils.isNotBlank(area)) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.readValue(area, ChinaIdArea.class);
+            } catch (JsonProcessingException e) {
 
+                return null;
+            }
+        }
         return null;
     }
 
@@ -112,6 +118,7 @@ public class ChinaIdCardFunctions {
             String cardString = card.toStringUtf8();
             int cardLength = cardString.length();
             int genderValue;
+            //Char("48") <---> 0, 15位身份证的看最后一位，18位身份证的看倒数第二位
             if (cardLength == 15) {
                 genderValue = cardString.charAt(15) - 48;
             } else {

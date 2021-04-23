@@ -10,29 +10,31 @@ import io.airlift.slice.Slices;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
 import java.util.Calendar;
-import java.util.Map;
-
 import static java.util.concurrent.TimeUnit.DAYS;
 
 /**
  * 1: 法定节假日, 2: 正常周末, 3: 正常工作日 4:攒假的工作日
  *
-
  */
 public class ChinaTypeOfDayFunction {
 
     public final static DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
-
-    public final static Map<String, String> dayMap = ConfigUtils.getDayMap();
 
     private ChinaTypeOfDayFunction(){
 
     }
 
     private enum DayType {
-        HOLIDAY("holiday"), WORKDAY("workday");
+        /**
+         * 法定节假日
+         */
+        HOLIDAY("holiday"),
+
+        /**
+         * 攒假的工作日
+         */
+        WORKDAY("workday");
 
         private String code;
         private DayType(String code) {
@@ -54,16 +56,20 @@ public class ChinaTypeOfDayFunction {
 
         String dateStr = string.toStringUtf8();
         try {
-            String value = dayMap.get(dateStr);
+            String value = ConfigUtils.getInstance().getDateType(dateStr);
             if (DayType.HOLIDAY.getCode().equalsIgnoreCase(value)) {
+                //1: 法定节假日
                 return 1;
             } else if (DayType.WORKDAY.getCode().equalsIgnoreCase(value)) {
+                //4:攒假的工作日
                 return 4;
             } else {
                 LocalDate date = LocalDate.parse(string.toStringUtf8(), DEFAULT_DATE_FORMATTER);
                 if (date.getDayOfWeek() < 6) {
+                    //正常工作日
                     return 3;
                 } else {
+                    //正常周末
                     return 2;
                 }
             }
