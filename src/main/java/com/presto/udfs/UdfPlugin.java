@@ -37,7 +37,7 @@ public class UdfPlugin implements Plugin {
         String classResource = this.getClass().getName().replace(".", "/") + ".class";
         String jarURLFile = Thread.currentThread().getContextClassLoader().getResource(classResource).getFile();
         int jarEnd = jarURLFile.indexOf('!');
-        // This is in URL format, convert once more to get actual file location
+        // This is in URL format, convert once more to get actual file location： file:/data/presto_data/plugin/hive-hadoop2/presto-udfs-1.0.0-shaded.jar
         String jarLocation = jarURLFile.substring(0, jarEnd);
         System.out.println("jarLocation=====" + jarLocation);
         jarLocation = new URL(jarLocation).getFile();
@@ -64,6 +64,10 @@ public class UdfPlugin implements Plugin {
         return classes;
     }
 
+    /**
+     * 实现com.facebook.presto.spi.Plugin接口中的方法getFunctions()，获取udf函数类
+     * @return
+     */
     @Override
     public Set<Class<?>> getFunctions() {
         try {
