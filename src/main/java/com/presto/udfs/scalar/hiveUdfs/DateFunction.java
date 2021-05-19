@@ -48,6 +48,19 @@ public final class DateFunction {
     private static final org.joda.time.format.DateTimeFormatter format4 = DateTimeFormat.forPattern("yyyyMMdd");
     private static final org.joda.time.format.DateTimeFormatter format5 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S");
 
+    @Description("Returns the date format string")
+    @ScalarFunction("date_format")
+    @SqlType(StandardTypes.VARCHAR)
+    public static Slice dateFormat(@SqlType(StandardTypes.VARCHAR) Slice inputTimestamp, @SqlType(StandardTypes.VARCHAR) Slice formatSlice)
+    {
+        String input = inputTimestamp.toStringUtf8();
+        if(input.length()>19){
+            input = input.substring(0,19);
+        }
+        return Slices.utf8Slice(TIMESTAMP_WITH_TIME_ZONE_FORMATTER.parseDateTime(input).toString(formatSlice.toStringUtf8()));
+    }
+
+
     @Description("Returns the date part of the date string")
     @ScalarFunction("to_date")
     @SqlType(StandardTypes.VARCHAR)
@@ -126,16 +139,16 @@ public final class DateFunction {
                 ((long) toUnixTimeFromTimestampWithTimeZone(timestamp) * 1000) + offset, utf8Slice("yyyy-MM-dd"));
     }
 
-    @Description("Returns the date part of the date string with format")
-    @ScalarFunction("to_date")
-    @SqlType(StandardTypes.VARCHAR)
-    public static Slice stringTimestampToDate(@SqlType(StandardTypes.VARCHAR) Slice inputTimestamp,@SqlType(StandardTypes.VARCHAR) Slice format)
-    {
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S ");
-
-        LocalDate date = LocalDate.parse(inputTimestamp.toStringUtf8(), formatter);
-        return utf8Slice(date.format(java.time.format.DateTimeFormatter.ofPattern(format.toString())));
-    }
+//    @Description("Returns the date part of the date string with format")
+//    @ScalarFunction("to_date")
+//    @SqlType(StandardTypes.VARCHAR)
+//    public static Slice stringTimestampToDate(@SqlType(StandardTypes.VARCHAR) Slice inputTimestamp,@SqlType(StandardTypes.VARCHAR) Slice format)
+//    {
+//        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S ");
+//
+//        LocalDate date = LocalDate.parse(inputTimestamp.toStringUtf8(), formatter);
+//        return utf8Slice(date.format(java.time.format.DateTimeFormatter.ofPattern(format.toString())));
+//    }
 
     @ScalarFunction("get_date")
     @Description("return the String date return negative values.")
