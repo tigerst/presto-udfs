@@ -24,3 +24,12 @@ presto自定义函数
   >> parse_json_array: parse the json to array(varchar)  
   
 ## 使用
+  >1.build the project if needed.  
+  >> mvn clean install  
+  
+  >2.put presto-udfs-{version}-shaded.jar into $PRESTO_HOME/plugin/hive-hadoop2  
+  >> mv presto-udfs-1.0.0-shaded.jar $PRESTO_HOME/plugin/hive-hadoop2  
+  
+  >3.restart presto server  
+  >> $PRESTO_HOME/bin/launcher restart  
+  
