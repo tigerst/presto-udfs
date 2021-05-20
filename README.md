@@ -1,7 +1,9 @@
 # presto-udfs
 presto自定义函数
 ## 常用函数
-
+  
+  Here is a part of common functions.
+  
   >string functions
   >>str_split: split the str by separatorSlice and len  
   >>substring_index: get substring by delim and count  
