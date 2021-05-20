@@ -16,6 +16,15 @@ public class CompressFunction {
 
     }
 
+    @ScalarFunction("uncompressGzip")
+    @Description("gizp压缩base64解密，charset为ISO_8859_1")
+    @SqlType(StandardTypes.VARCHAR)
+    public static Slice uncompressGzip(@SqlType(StandardTypes.VARCHAR) Slice slice){
+        if (slice == null) {
+            return null;
+        }
+        return Slices.copiedBuffer(GzipUtils.uncompressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+    }
 
     @ScalarFunction("compress")
     @Description("gizp压缩base64加密，charset为ISO_8859_1")
