@@ -13,14 +13,14 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
-@ScalarFunction("pinyin")
 public class ChineseToPinYinFunctions {
 
     private ChineseToPinYinFunctions(){
 
     }
 
-    @Description("Convert chinese to pinyin.")
+    @ScalarFunction("pinyin")
+    @Description("Convert chinese to pinyin without separator.")
     @SqlType(StandardTypes.VARCHAR)
     public static Slice convertToPinYin(@SqlType(StandardTypes.VARCHAR) Slice string) {
         if (string == null) {
@@ -35,6 +35,28 @@ public class ChineseToPinYinFunctions {
         String result = null;
         try {
             result = PinyinHelper.toHanyuPinyinString(string.toStringUtf8(), pyFormat, "");
+            return Slices.utf8Slice(result);
+        } catch (BadHanyuPinyinOutputFormatCombination e) {
+            return null;
+        }
+    }
+
+    @ScalarFunction("pinyin")
+    @Description("Convert chinese to pinyin with separator.")
+    @SqlType(StandardTypes.VARCHAR)
+    public static Slice convertToPinYin(@SqlType(StandardTypes.VARCHAR) Slice string, @SqlType(StandardTypes.VARCHAR) Slice separator) {
+        if (string == null) {
+            return null;
+        }
+
+        HanyuPinyinOutputFormat pyFormat = new HanyuPinyinOutputFormat();
+        pyFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        pyFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        pyFormat.setVCharType(HanyuPinyinVCharType.WITH_V);
+
+        String result = null;
+        try {
+            result = PinyinHelper.toHanyuPinyinString(string.toStringUtf8(), pyFormat, separator.toStringUtf8());
             return Slices.utf8Slice(result);
         } catch (BadHanyuPinyinOutputFormatCombination e) {
             return null;
