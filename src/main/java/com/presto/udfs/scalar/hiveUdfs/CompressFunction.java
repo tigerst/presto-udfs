@@ -23,7 +23,12 @@ public class CompressFunction {
         if (slice == null) {
             return null;
         }
-        return Slices.copiedBuffer(GzipUtils.uncompressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        try {
+            return Slices.copiedBuffer(GzipUtils.uncompressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        } catch (Exception e) {
+            //异常时，返回传入的数据
+            return slice;
+        }
     }
 
     @ScalarFunction("compress")
@@ -33,7 +38,12 @@ public class CompressFunction {
         if (slice == null) {
             return null;
         }
-        return Slices.copiedBuffer(GzipUtils.compressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        try {
+            return Slices.copiedBuffer(GzipUtils.compressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        } catch (Exception e) {
+            //异常时，返回传入的数据
+            return slice;
+        }
     }
 
     @ScalarFunction("uncompress")
@@ -43,7 +53,12 @@ public class CompressFunction {
         if (slice == null) {
             return null;
         }
-        return Slices.copiedBuffer(GzipUtils.uncompressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        try {
+            return Slices.copiedBuffer(GzipUtils.uncompressB64Msg(slice.toString(StandardCharsets.ISO_8859_1)), StandardCharsets.ISO_8859_1);
+        } catch (Exception e) {
+            //异常时，返回传入的数据
+            return slice;
+        }
     }
 
 }

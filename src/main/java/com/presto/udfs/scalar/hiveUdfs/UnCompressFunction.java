@@ -17,11 +17,15 @@ public class UnCompressFunction {
     @ScalarFunction("gzip_b64_uncompress")
     @Description("gizp压缩base64解密")
     @SqlType(StandardTypes.VARCHAR)
-    public static Slice compress(@SqlType(StandardTypes.VARCHAR) Slice slice){
+    public static Slice unCompress(@SqlType(StandardTypes.VARCHAR) Slice slice){
         if (slice == null) {
             return null;
         }
-        return Slices.utf8Slice(GzipUtils.uncompressB64Msg(slice.toStringUtf8()));
+        try {
+            return Slices.utf8Slice(GzipUtils.uncompressB64Msg(slice.toStringUtf8()));
+        } catch (Exception e) {
+            return slice;
+        }
     }
 
 }
